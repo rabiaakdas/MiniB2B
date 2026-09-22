@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MiniB2B.Api/MiniB2B.Api.csproj" />
+  <Project Path="MiniB2B.Application/MiniB2B.Application.csproj" />
+  <Project Path="MiniB2B.Domain/MiniB2B.Domain.csproj" />
+  <Project Path="MiniB2B.Infrastructure/MiniB2B.Infrastructure.csproj" />
+</Solution>
