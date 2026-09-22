@@ -2,7 +2,7 @@
 
 ## Proje Hakkında
 
-Mini B2B E-Commerce; bayi/kullanici odakli urun katalogu, veritabaniyla yonetilen dinamik B2B grid, sepet, siparis ve admin yonetimi iceren sade bir full-stack uygulamadir.
+Mini B2B E-Commerce; bayi/kullanıcı odaklı ürün kataloğu, veritabanıyla yönetilen dinamik B2B grid, sepet, sipariş ve admin yönetimi içeren sade bir full-stack uygulamadır.
 
 ## Teknolojiler
 
@@ -14,7 +14,7 @@ Backend:
 - ASP.NET Core Identity
 - JWT
 
-Database:
+Veritabanı:
 - SQL Server / SQL Server LocalDB
 
 Frontend:
@@ -26,19 +26,19 @@ Frontend:
 
 ## Mimari
 
-Proje katmanli yapi ve Clean Architecture prensipleriyle ayrilmistir:
+Proje katmanlı yapı ve Clean Architecture prensipleriyle ayrılmıştır:
 
-- `MiniB2B.Api`: HTTP API, controller, middleware, DI, auth ve static file yayinlama.
+- `MiniB2B.Api`: HTTP API, controller, middleware, DI, auth ve static file yayınlama.
 - `MiniB2B.Application`: DTO, interface, role sabitleri ve sade response modelleri.
 - `MiniB2B.Domain`: Entity ve enum modelleri.
-- `MiniB2B.Infrastructure`: EF Core, Identity, DbContext, Fluent API configuration ve servis implementasyonlari.
+- `MiniB2B.Infrastructure`: EF Core, Identity, DbContext, Fluent API configuration ve servis implementasyonları.
 - `MiniB2B.Web`: React + TypeScript frontend.
 
-Dependency yonu Domain'den disariya dogru degildir; Domain EF Core, Identity veya ASP.NET Core'a bagimli degildir.
+Dependency yönü Domain'den dışarıya doğru değildir; Domain EF Core, Identity veya ASP.NET Core'a bağımlı değildir.
 
-## Temel Ozellikler
+## Temel Özellikler
 
-- Register/Login ve JWT tabanli authentication
+- Register/Login ve JWT tabanlı authentication
 - Admin/User rolleri
 - Admin product management
 - Server-side search ve pagination
@@ -56,25 +56,25 @@ Dependency yonu Domain'den disariya dogru degildir; Domain EF Core, Identity vey
 
 ## Dinamik B2B Grid
 
-`ProductGridColumns` tablosu grid davranisini veritabanindan kontrol eder:
+`ProductGridColumns` tablosu grid davranışını veritabanından kontrol eder:
 
-- `FieldName`: gosterilecek alan veya pseudo-field
-- `DisplayOrder`: kolon sirasi
+- `FieldName`: gösterilecek alan veya pseudo-field
+- `DisplayOrder`: kolon sırası
 - `RenderType`: Text, Image, Currency, StockStatus, QuantityInput, AddToCart
 - `Width` ve `Alignment`
 - Desktop/tablet/mobile visibility
 
-Frontend kolonlari hard-coded basmaz; API'den gelen metadata ile `columns.map(...)` uzerinden header ve cell uretir. Urun verisi `row.values[column.fieldName]` ile okunur. Boylece kod degisikligi olmadan bayi grid duzeni veritabanindan degistirilebilir.
+Frontend kolonları hard-coded basmaz; API'den gelen metadata ile `columns.map(...)` üzerinden header ve cell üretir. Ürün verisi `row.values[column.fieldName]` ile okunur. Böylece kod değişikliği olmadan bayi grid düzeni veritabanından değiştirilebilir.
 
-## Siparis ve Stok Guvenligi
+## Sipariş ve Stok Güvenliği
 
 - Cart stok rezervasyonu yapmaz.
-- Siparis olusturulmadan hemen once urun, kategori, fiyat ve stok tekrar veritabanindan okunur.
-- Order creation transaction icinde calisir.
-- Basarili sipariste `Order`, `OrderItems`, stok dusumu ve cart temizleme birlikte commit edilir.
-- `OrderItem` icinde `ProductCode`, `ProductName`, `UnitPrice`, `Quantity`, `TotalPrice` snapshot olarak saklanir.
-- Product daha sonra degisse bile order history snapshot verisini gosterir.
-- `Product.RowVersion` SQL Server rowversion olarak configure edilmistir ve concurrent stock update senaryolarinda optimistic concurrency saglar.
+- Sipariş oluşturulmadan hemen önce ürün, kategori, fiyat ve stok tekrar veritabanından okunur.
+- Order creation transaction içinde çalışır.
+- Başarılı siparişte `Order`, `OrderItems`, stok düşümü ve cart temizleme birlikte commit edilir.
+- `OrderItem` içinde `ProductCode`, `ProductName`, `UnitPrice`, `Quantity`, `TotalPrice` snapshot olarak saklanır.
+- Product daha sonra değişse bile order history snapshot verisini gösterir.
+- `Product.RowVersion` SQL Server rowversion olarak configure edilmiştir ve concurrent stock update senaryolarında optimistic concurrency sağlar.
 
 ## Kurulum
 
@@ -84,9 +84,9 @@ Gereksinimler:
 - Node.js ve npm
 - SQL Server veya SQL Server LocalDB
 
-## Backend Ayarlari
+## Backend Ayarları
 
-`MiniB2B.Api/appsettings.json` icinde development icin LocalDB connection string bulunur:
+`MiniB2B.Api/appsettings.json` içinde development için LocalDB connection string bulunur:
 
 ```json
 "ConnectionStrings": {
@@ -94,13 +94,13 @@ Gereksinimler:
 }
 ```
 
-JWT signing key repository'ye yazilmaz. Development icin User Secrets kullanin:
+JWT signing key repository'ye yazılmaz. Development için User Secrets kullanın:
 
 ```powershell
 dotnet user-secrets set "Jwt:Key" "YOUR-STRONG-DEVELOPMENT-KEY" --project MiniB2B.Api
 ```
 
-Development admin seed opsiyoneldir ve yalnizca Development ortaminda User Secrets degerleri varsa calisir:
+Development admin seed opsiyoneldir ve yalnızca Development ortamında User Secrets değerleri varsa çalışır:
 
 ```powershell
 dotnet user-secrets set "DevelopmentAdmin:Email" "admin@example.com" --project MiniB2B.Api
@@ -109,27 +109,27 @@ dotnet user-secrets set "DevelopmentAdmin:FirstName" "Admin" --project MiniB2B.A
 dotnet user-secrets set "DevelopmentAdmin:LastName" "User" --project MiniB2B.Api
 ```
 
-Gercek secret, token veya parola repository'ye eklenmemelidir.
+Gerçek secret, token veya parola repository'ye eklenmemelidir.
 
 ## Development Admin Kurulumu
 
-Repository icinde hazir bir admin parolasi bulunmaz. Development ortaminda ilk admin hesabi guvenlik nedeniyle User Secrets uzerinden yapilandirilir. Uygulama ilk calistiginda seed mekanizmasi bu bilgilerle Admin rolune sahip hesabi olusturur. Normal `Kayit Ol` ekrani yalniz standart `User` hesabi olusturur; public admin register yoktur.
+Repository içinde hazır bir admin parolası bulunmaz. Development ortamında ilk admin hesabı güvenlik nedeniyle User Secrets üzerinden yapılandırılır. Uygulama ilk çalıştığında seed mekanizması bu bilgilerle Admin rolüne sahip hesabı oluşturur. Normal `Kayıt Ol` ekranı yalnız standart `User` hesabı oluşturur; public admin register yoktur.
 
-1. Backend proje klasorunu hedefleyerek User Secrets degerlerini ayarlayin.
+1. Backend proje klasörünü hedefleyerek User Secrets değerlerini ayarlayın.
 
-`MiniB2B.Api` projesinde `UserSecretsId` zaten tanimlidir. Gerekirse init komutu su sekildedir:
+`MiniB2B.Api` projesinde `UserSecretsId` zaten tanımlıdır. Gerekirse init komutu şu şekildedir:
 
 ```powershell
 dotnet user-secrets init --project MiniB2B.Api
 ```
 
-2. JWT signing key'i ayarlayin. Bu key en az 32 byte uzunlugunda olmalidir:
+2. JWT signing key'i ayarlayın. Bu key en az 32 byte uzunluğunda olmalıdır:
 
 ```powershell
 dotnet user-secrets set "Jwt:Key" "<YOUR_JWT_SECRET_AT_LEAST_32_BYTES>" --project MiniB2B.Api
 ```
 
-3. Kendi development admin bilgilerinizi ayarlayin:
+3. Kendi development admin bilgilerinizi ayarlayın:
 
 ```powershell
 dotnet user-secrets set "DevelopmentAdmin:Email" "<YOUR_ADMIN_EMAIL>" --project MiniB2B.Api
@@ -138,40 +138,40 @@ dotnet user-secrets set "DevelopmentAdmin:FirstName" "<YOUR_ADMIN_FIRST_NAME>" -
 dotnet user-secrets set "DevelopmentAdmin:LastName" "<YOUR_ADMIN_LAST_NAME>" --project MiniB2B.Api
 ```
 
-Admin parolasi mevcut Identity password policy'sine uymalidir:
+Admin parolası mevcut Identity password policy'sine uymalıdır:
 
 - minimum 8 karakter
 - en az bir rakam
-- en az bir kucuk harf
-- en az bir buyuk harf
+- en az bir küçük harf
+- en az bir büyük harf
 
-4. Database'i migration ile olusturun veya guncelleyin:
+4. Veritabanını migration ile oluşturun veya güncelleyin:
 
 ```powershell
 dotnet tool restore
 dotnet tool run dotnet-ef database update --project MiniB2B.Infrastructure --startup-project MiniB2B.Api --context ApplicationDbContext
 ```
 
-5. API'yi Development ortaminda calistirin:
+5. API'yi Development ortamında çalıştırın:
 
 ```powershell
 dotnet run --project MiniB2B.Api --urls http://localhost:5051
 ```
 
-Ilk calismada:
+İlk çalışmada:
 
-- `Admin` ve `User` rolleri olusturulur.
-- `DevelopmentAdmin:Email` ve `DevelopmentAdmin:Password` varsa admin hesabi Identity `UserManager` ile olusturulur.
-- Hesap zaten varsa duplicate olusturulmaz.
-- Hesap Admin rolunde degilse Admin rolune eklenir.
+- `Admin` ve `User` rolleri oluşturulur.
+- `DevelopmentAdmin:Email` ve `DevelopmentAdmin:Password` varsa admin hesabı Identity `UserManager` ile oluşturulur.
+- Hesap zaten varsa duplicate oluşturulmaz.
+- Hesap Admin rolünde değilse Admin rolüne eklenir.
 
-6. Frontend ayarini yapin:
+6. Frontend ayarını yapın:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5051
 ```
 
-7. Frontend'i calistirin:
+7. Frontend'i çalıştırın:
 
 ```powershell
 cd MiniB2B.Web
@@ -179,11 +179,11 @@ npm install
 npm run dev
 ```
 
-8. Tarayicida normal Login ekranindan kendi belirlediginiz admin e-posta/parola ile giris yapin. JWT icindeki Admin role bilgisiyle frontend `/admin` paneline yonlendirir ve admin endpointleri `[Authorize(Roles = Admin)]` ile korunmaya devam eder.
+8. Tarayıcıda normal Login ekranından kendi belirlediğiniz admin e-posta/parola ile giriş yapın. JWT içindeki Admin role bilgisiyle frontend `/admin` paneline yönlendirir ve admin endpointleri `[Authorize(Roles = Admin)]` ile korunmaya devam eder.
 
-Sonraki admin hesaplari public kayitla degil, yalniz mevcut yetkili adminin `Hesabim > Yeni Yonetici Ekle` bolumunden olusturulabilir.
+Sonraki admin hesapları public kayıtla değil, yalnız mevcut yetkili adminin `Hesabım > Yeni Yönetici Ekle` bölümünden oluşturulabilir.
 
-## Database
+## Veritabanı
 
 Local EF tool restore:
 
@@ -191,7 +191,7 @@ Local EF tool restore:
 dotnet tool restore
 ```
 
-Migration ile database olusturma/guncelleme:
+Migration ile veritabanı oluşturma/güncelleme:
 
 ```powershell
 dotnet tool run dotnet-ef database update --project MiniB2B.Infrastructure --startup-project MiniB2B.Api --context ApplicationDbContext
@@ -203,7 +203,7 @@ Alternatif schema scripti:
 database/MiniB2B.sql
 ```
 
-Guncel migration zinciri:
+Güncel migration zinciri:
 
 ```text
 20260918111742_InitialCreate
@@ -211,9 +211,9 @@ Guncel migration zinciri:
 20260921162211_RemoveLinkUrlFromBanners
 ```
 
-`CompanyName` ve `Banner.LinkUrl` aktif model/database alanlari degildir. Eski alan adlarinin historical migration dosyalarinda gorunmesi normaldir.
+`CompanyName` ve `Banner.LinkUrl` aktif model/database alanları değildir. Eski alan adlarının historical migration dosyalarında görünmesi normaldir.
 
-## Backend Calistirma
+## Backend Çalıştırma
 
 ```powershell
 dotnet run --project MiniB2B.Api --urls http://localhost:5051
@@ -225,7 +225,7 @@ Development Swagger:
 http://localhost:5051/swagger
 ```
 
-## Frontend Ayarlari
+## Frontend Ayarları
 
 `MiniB2B.Web/.env`:
 
@@ -233,9 +233,9 @@ http://localhost:5051/swagger
 VITE_API_BASE_URL=http://localhost:5051
 ```
 
-`.env.example` secret icermez ve ayni key icin ornek deger tutar.
+`.env.example` secret içermez ve aynı key için örnek değer tutar.
 
-## Frontend Calistirma
+## Frontend Çalıştırma
 
 ```powershell
 cd MiniB2B.Web
@@ -254,16 +254,16 @@ http://localhost:5173
 - `Admin`
 - `User`
 
-Varsayilan parola repository'de bulunmaz. Normal kullanici `/register` uzerinden olusturulabilir. Development admin hesabi gerekiyorsa User Secrets ile seed edilir.
+Varsayılan parola repository'de bulunmaz. Normal kullanıcı `/register` üzerinden oluşturulabilir. Development admin hesabı gerekiyorsa User Secrets ile seed edilir.
 
-## API Ozeti
+## API Özeti
 
 Auth:
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 
-`GET /api/auth/me`, JWT icindeki kullanici id ile current user'i belirler; ad, soyad, e-posta ve rol bilgilerini guncel Identity kaydindan doner.
+`GET /api/auth/me`, JWT içindeki kullanıcı id ile current user'ı belirler; ad, soyad, e-posta ve rol bilgilerini güncel Identity kaydından döner.
 
 Account:
 - `GET /api/account`
@@ -297,23 +297,23 @@ Admin:
 Banners:
 - `GET /api/banners`
 
-Banner kayitlari `Title`, `Subtitle`, `ImagePath`, `DisplayOrder`, `IsActive`, `StartDate` ve `EndDate` alanlariyla yonetilir. Public banner endpointi yalniz aktif ve tarih araliginda gecerli bannerlari dondurur.
+Banner kayıtları `Title`, `Subtitle`, `ImagePath`, `DisplayOrder`, `IsActive`, `StartDate` ve `EndDate` alanlarıyla yönetilir. Public banner endpointi yalnız aktif ve tarih aralığında geçerli bannerları döndürür.
 
-## Guvenlik Notlari
+## Güvenlik Notları
 
 - Parolalar ASP.NET Core Identity ile hashlenir.
-- PasswordHash DTO veya API response icinde donmez.
-- Kullanici kendi hesap bilgilerini `Hesabim` ekranindan goruntuleyebilir; ad, soyad, e-posta ve telefon bilgilerini guncelleyebilir.
-- Kullanici kendi parolasini mevcut parolasini dogrulayarak ASP.NET Core Identity `ChangePasswordAsync` akisi ile degistirebilir.
-- Admin kendi parolasini `Hesabim` ekranindan ASP.NET Core Identity `ChangePasswordAsync` akisi ile degistirebilir.
-- Yetkili admin yeni admin hesabi olusturabilir; normal kullanici yonetiminden baska kullanicilarin parolasi goruntulenmez veya degistirilmez.
+- PasswordHash DTO veya API response içinde dönmez.
+- Kullanıcı kendi hesap bilgilerini `Hesabım` ekranından görüntüleyebilir; ad, soyad, e-posta ve telefon bilgilerini güncelleyebilir.
+- Kullanıcı kendi parolasını mevcut parolasını doğrulayarak ASP.NET Core Identity `ChangePasswordAsync` akışı ile değiştirebilir.
+- Admin kendi parolasını `Hesabım` ekranından ASP.NET Core Identity `ChangePasswordAsync` akışı ile değiştirebilir.
+- Yetkili admin yeni admin hesabı oluşturabilir; normal kullanıcı yönetiminden başka kullanıcıların parolası görüntülenmez veya değiştirilmez.
 - Admin endpointleri role authorization ile korunur.
-- User ownership gereken kaynaklarda kullanici id JWT claim'den alinir.
-- Ad ve soyad zorunludur, yalniz whitespace kabul edilmez ve en fazla 100 karakter olabilir.
-- E-posta formati backend tarafinda dogrulanir ve duplicate email engellenir.
-- Telefon opsiyoneldir; girildiyse `05` ile baslayan tam 11 rakam olmalidir.
-- Upload islemlerinde dosya boyutu, extension, content-type, random filename ve controlled directory kurallari uygulanir.
-- Frontend bu assignment'in JWT response contract'i nedeniyle token'i `localStorage` icinde saklar. Production ortaminda XSS riskini azaltmak icin HttpOnly + Secure + SameSite cookie tabanli bir yaklasim degerlendirilebilir.
+- User ownership gereken kaynaklarda kullanıcı id JWT claim'den alınır.
+- Ad ve soyad zorunludur, yalnız whitespace kabul edilmez ve en fazla 100 karakter olabilir.
+- E-posta formatı backend tarafında doğrulanır ve duplicate email engellenir.
+- Telefon opsiyoneldir; girildiyse `05` ile başlayan tam 11 rakam olmalıdır.
+- Upload işlemlerinde dosya boyutu, extension, content-type, random filename ve controlled directory kuralları uygulanır.
+- Frontend bu assignment'ın JWT response contract'ı nedeniyle token'ı `localStorage` içinde saklar. Production ortamında XSS riskini azaltmak için HttpOnly + Secure + SameSite cookie tabanlı bir yaklaşım değerlendirilebilir.
 
 ## Test / Build
 
@@ -332,7 +332,3 @@ npm install
 npm run lint
 npm run build
 ```
-
-## Veritabani Notlari
-
-`OrderItem.ProductId` nullable'dir. Urun fiziksel olarak silinse veya daha sonra degisse bile siparis gecmisi `OrderItem` snapshot alanlariyla gosterilir. Normal uygulama akisinda urun silmek yerine `IsActive=false` kullanilir.
