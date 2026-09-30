@@ -5,13 +5,13 @@ using MiniB2B.Infrastructure.Identity;
 
 namespace MiniB2B.Infrastructure.Configurations;
 
-public class OrderConfiguration : IEntityTypeConfiguration<Order>
+public class SiparisRConfiguration : IEntityTypeConfiguration<SiparisR>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    public void Configure(EntityTypeBuilder<SiparisR> builder)
     {
-        builder.ToTable("Orders", table =>
+        builder.ToTable("SiparisR", table =>
         {
-            table.HasCheckConstraint("CK_Orders_TotalAmount_NonNegative", "[TotalAmount] >= 0");
+            table.HasCheckConstraint("CK_SiparisR_TotalAmount_NonNegative", "[TotalAmount] >= 0");
         });
 
         builder.HasKey(order => order.Id);
@@ -22,6 +22,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Property(order => order.UserId)
             .IsRequired();
+
+        builder.Property(order => order.SepetId)
+            .IsRequired(false);
 
         builder.Property(order => order.OrderDate)
             .IsRequired();
@@ -41,14 +44,23 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(order => order.Status);
 
+        builder.HasIndex(order => order.SepetId);
+
         builder.HasOne<ApplicationUser>()
             .WithMany()
             .HasForeignKey(order => order.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // SiparisR ile kaynak SepetR arasındaki bağlantıyı SepetId üzerinden kurdum.
+        builder.HasOne(order => order.Sepet)
+            .WithMany()
+            .HasForeignKey(order => order.SepetId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // SiparisR ile SiparisD arasındaki ana kayıt/detay ilişkisini yeni R/D isimleriyle kurdum.
         builder.HasMany(order => order.Items)
-            .WithOne(item => item.Order)
-            .HasForeignKey(item => item.OrderId)
+            .WithOne(item => item.SiparisR)
+            .HasForeignKey(item => item.SiparisRId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

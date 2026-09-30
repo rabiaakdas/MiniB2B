@@ -27,8 +27,9 @@ public class AdminOrderService : IAdminOrderService
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
+        // Admin sipariş ekranındaki eski Order kullanımını SiparisR yapısına uyarladım.
         var query =
-            from order in _dbContext.Orders.AsNoTracking()
+            from order in _dbContext.SiparisR.AsNoTracking()
             join user in _dbContext.Users.AsNoTracking() on order.UserId equals user.Id
             select new
             {
@@ -91,7 +92,7 @@ public class AdminOrderService : IAdminOrderService
     public async Task<ServiceResult<AdminOrderDetailDto>> GetByIdAsync(int id)
     {
         var order = await (
-            from orderItem in _dbContext.Orders.AsNoTracking()
+            from orderItem in _dbContext.SiparisR.AsNoTracking()
             join user in _dbContext.Users.AsNoTracking() on orderItem.UserId equals user.Id
             where orderItem.Id == id
             select new AdminOrderDetailDto
@@ -136,7 +137,7 @@ public class AdminOrderService : IAdminOrderService
             return ServiceResult<AdminOrderDetailDto>.Failure(400, "Geçersiz sipariş durumu.");
         }
 
-        var order = await _dbContext.Orders.FirstOrDefaultAsync(item => item.Id == id);
+        var order = await _dbContext.SiparisR.FirstOrDefaultAsync(item => item.Id == id);
 
         if (order is null)
         {

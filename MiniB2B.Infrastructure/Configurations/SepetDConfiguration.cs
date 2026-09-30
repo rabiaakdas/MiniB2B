@@ -4,18 +4,18 @@ using MiniB2B.Domain.Entities;
 
 namespace MiniB2B.Infrastructure.Configurations;
 
-public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
+public class SepetDConfiguration : IEntityTypeConfiguration<SepetD>
 {
-    public void Configure(EntityTypeBuilder<CartItem> builder)
+    public void Configure(EntityTypeBuilder<SepetD> builder)
     {
-        builder.ToTable("CartItems", table =>
+        builder.ToTable("SepetD", table =>
         {
-            table.HasCheckConstraint("CK_CartItems_Quantity_Positive", "[Quantity] > 0");
+            table.HasCheckConstraint("CK_SepetD_Quantity_Positive", "[Quantity] > 0");
         });
 
         builder.HasKey(item => item.Id);
 
-        builder.Property(item => item.CartId)
+        builder.Property(item => item.SepetRId)
             .IsRequired();
 
         builder.Property(item => item.ProductId)
@@ -29,12 +29,13 @@ public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
 
         builder.Property(item => item.UpdatedAt);
 
-        builder.HasIndex(item => new { item.CartId, item.ProductId })
+        // CartItem tarafındaki sepet-ürün indexini SepetD yapısına uyarladım.
+        builder.HasIndex(item => new { item.SepetRId, item.ProductId })
             .IsUnique();
 
-        builder.HasOne(item => item.Cart)
+        builder.HasOne(item => item.SepetR)
             .WithMany(cart => cart.Items)
-            .HasForeignKey(item => item.CartId)
+            .HasForeignKey(item => item.SepetRId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(item => item.Product)

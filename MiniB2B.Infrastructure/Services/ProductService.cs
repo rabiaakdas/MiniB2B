@@ -192,13 +192,20 @@ public class ProductService : IProductService
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-        var cartItems = await _dbContext.CartItems
+        var cartItems = await _dbContext.SepetD
             .Where(item => item.ProductId == id)
             .ToListAsync();
+        var sepetRIds = cartItems
+            .Select(item => item.SepetRId)
+            .Distinct()
+            .ToList();
 
         if (cartItems.Count > 0)
         {
-            _dbContext.CartItems.RemoveRange(cartItems);
+            // ProductService içindeki CartItem kullanımını SepetD'ye uyarladım ve etkilenen SepetR toplamlarını güncelledim.
+            _dbContext.SepetD.RemoveRange(cartItems);
+            await _dbContext.SaveChangesAsync();
+            await RefreshCartTotalsAsync(sepetRIds);
         }
 
         _dbContext.Products.Remove(product);
@@ -270,5 +277,33 @@ public class ProductService : IProductService
     private static string? TrimToNull(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private async Task RefreshCartTotalsAsync(IReadOnlyCollection<int> sepetRIds)
+    {
+        if (sepetRIds.Count == 0)
+        {
+            return;
+        }
+
+        var totals = await _dbContext.SepetD
+            .Where(item => sepetRIds.Contains(item.SepetRId))
+            .GroupBy(item => item.SepetRId)
+            .Select(group => new
+            {
+                SepetRId = group.Key,
+                TotalAmount = group.Sum(item => item.Product.Price * item.Quantity)
+            })
+            .ToListAsync();
+
+        var carts = await _dbContext.SepetR
+            .Where(item => sepetRIds.Contains(item.Id))
+            .ToListAsync();
+
+        foreach (var cart in carts)
+        {
+            cart.TotalAmount = totals.FirstOrDefault(item => item.SepetRId == cart.Id)?.TotalAmount ?? 0m;
+            cart.UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

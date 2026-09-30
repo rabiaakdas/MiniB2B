@@ -5,16 +5,23 @@ using MiniB2B.Infrastructure.Identity;
 
 namespace MiniB2B.Infrastructure.Configurations;
 
-public class CartConfiguration : IEntityTypeConfiguration<Cart>
+public class SepetRConfiguration : IEntityTypeConfiguration<SepetR>
 {
-    public void Configure(EntityTypeBuilder<Cart> builder)
+    public void Configure(EntityTypeBuilder<SepetR> builder)
     {
-        builder.ToTable("Carts");
+        builder.ToTable("SepetR", table =>
+        {
+            table.HasCheckConstraint("CK_SepetR_TotalAmount_NonNegative", "[TotalAmount] >= 0");
+        });
 
         builder.HasKey(cart => cart.Id);
 
         builder.Property(cart => cart.UserId)
             .IsRequired();
+
+        builder.Property(cart => cart.TotalAmount)
+            .IsRequired()
+            .HasColumnType("decimal(18,2)");
 
         builder.Property(cart => cart.CreatedAt)
             .IsRequired();
@@ -26,12 +33,13 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
 
         builder.HasOne<ApplicationUser>()
             .WithOne()
-            .HasForeignKey<Cart>(cart => cart.UserId)
+            .HasForeignKey<SepetR>(cart => cart.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // SepetR ile SepetD arasındaki ana kayıt/detay ilişkisini yeni R/D isimleriyle kurdum.
         builder.HasMany(cart => cart.Items)
-            .WithOne(item => item.Cart)
-            .HasForeignKey(item => item.CartId)
+            .WithOne(item => item.SepetR)
+            .HasForeignKey(item => item.SepetRId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

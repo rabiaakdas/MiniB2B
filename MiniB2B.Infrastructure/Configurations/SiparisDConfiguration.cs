@@ -4,20 +4,20 @@ using MiniB2B.Domain.Entities;
 
 namespace MiniB2B.Infrastructure.Configurations;
 
-public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
+public class SiparisDConfiguration : IEntityTypeConfiguration<SiparisD>
 {
-    public void Configure(EntityTypeBuilder<OrderItem> builder)
+    public void Configure(EntityTypeBuilder<SiparisD> builder)
     {
-        builder.ToTable("OrderItems", table =>
+        builder.ToTable("SiparisD", table =>
         {
-            table.HasCheckConstraint("CK_OrderItems_Quantity_Positive", "[Quantity] > 0");
-            table.HasCheckConstraint("CK_OrderItems_UnitPrice_NonNegative", "[UnitPrice] >= 0");
-            table.HasCheckConstraint("CK_OrderItems_TotalPrice_NonNegative", "[TotalPrice] >= 0");
+            table.HasCheckConstraint("CK_SiparisD_Quantity_Positive", "[Quantity] > 0");
+            table.HasCheckConstraint("CK_SiparisD_UnitPrice_NonNegative", "[UnitPrice] >= 0");
+            table.HasCheckConstraint("CK_SiparisD_TotalPrice_NonNegative", "[TotalPrice] >= 0");
         });
 
         builder.HasKey(item => item.Id);
 
-        builder.Property(item => item.OrderId)
+        builder.Property(item => item.SiparisRId)
             .IsRequired();
 
         builder.Property(item => item.ProductId)
@@ -42,9 +42,10 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .IsRequired()
             .HasColumnType("decimal(18,2)");
 
-        builder.HasOne(item => item.Order)
+        // OrderItem ilişki yapılandırmasını SiparisD adına göre uyarladım.
+        builder.HasOne(item => item.SiparisR)
             .WithMany(order => order.Items)
-            .HasForeignKey(item => item.OrderId)
+            .HasForeignKey(item => item.SiparisRId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(item => item.Product)

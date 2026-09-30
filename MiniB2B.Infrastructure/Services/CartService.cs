@@ -42,19 +42,19 @@ public class CartService : ICartService
             return ServiceResult<CartDto>.Failure(400, validationError);
         }
 
-        var cart = await _dbContext.Carts
+        var cart = await _dbContext.SepetR
             .Include(item => item.Items)
             .FirstOrDefaultAsync(item => item.UserId == userId);
 
         if (cart is null)
         {
-            cart = new Cart
+            cart = new SepetR
             {
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow
             };
 
-            _dbContext.Carts.Add(cart);
+            _dbContext.SepetR.Add(cart);
         }
 
         var existingItem = cart.Items.FirstOrDefault(item => item.ProductId == request.ProductId);
@@ -69,7 +69,7 @@ public class CartService : ICartService
 
         if (existingItem is null)
         {
-            cart.Items.Add(new CartItem
+            cart.Items.Add(new SepetD
             {
                 ProductId = request.ProductId,
                 Quantity = request.Quantity,
@@ -85,6 +85,8 @@ public class CartService : ICartService
         cart.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
+        await RefreshCartTotalAsync(cart.Id);
+        await _dbContext.SaveChangesAsync();
 
         return ServiceResult<CartDto>.Success(await GetCartAsync(userId));
     }
@@ -99,11 +101,11 @@ public class CartService : ICartService
             return ServiceResult<CartDto>.Failure(400, "Quantity pozitif olmalıdır.");
         }
 
-        var cartItem = await _dbContext.CartItems
-            .Include(item => item.Cart)
+        var cartItem = await _dbContext.SepetD
+            .Include(item => item.SepetR)
             .Include(item => item.Product)
             .ThenInclude(product => product.Category)
-            .FirstOrDefaultAsync(item => item.Id == cartItemId && item.Cart.UserId == userId);
+            .FirstOrDefaultAsync(item => item.Id == cartItemId && item.SepetR.UserId == userId);
 
         if (cartItem is null)
         {
@@ -126,8 +128,10 @@ public class CartService : ICartService
 
         cartItem.Quantity = request.Quantity;
         cartItem.UpdatedAt = DateTime.UtcNow;
-        cartItem.Cart.UpdatedAt = DateTime.UtcNow;
+        cartItem.SepetR.UpdatedAt = DateTime.UtcNow;
 
+        await _dbContext.SaveChangesAsync();
+        await RefreshCartTotalAsync(cartItem.SepetRId);
         await _dbContext.SaveChangesAsync();
 
         return ServiceResult<CartDto>.Success(await GetCartAsync(userId));
@@ -135,18 +139,21 @@ public class CartService : ICartService
 
     public async Task<ServiceResult<CartDto>> RemoveItemAsync(int userId, int cartItemId)
     {
-        var cartItem = await _dbContext.CartItems
-            .Include(item => item.Cart)
-            .FirstOrDefaultAsync(item => item.Id == cartItemId && item.Cart.UserId == userId);
+        var cartItem = await _dbContext.SepetD
+            .Include(item => item.SepetR)
+            .FirstOrDefaultAsync(item => item.Id == cartItemId && item.SepetR.UserId == userId);
 
         if (cartItem is null)
         {
             return ServiceResult<CartDto>.Failure(404, "Sepet ürünü bulunamadı.");
         }
 
-        cartItem.Cart.UpdatedAt = DateTime.UtcNow;
-        _dbContext.CartItems.Remove(cartItem);
+        var sepetRId = cartItem.SepetRId;
+        cartItem.SepetR.UpdatedAt = DateTime.UtcNow;
+        _dbContext.SepetD.Remove(cartItem);
 
+        await _dbContext.SaveChangesAsync();
+        await RefreshCartTotalAsync(sepetRId);
         await _dbContext.SaveChangesAsync();
 
         return ServiceResult<CartDto>.Success(await GetCartAsync(userId));
@@ -154,9 +161,9 @@ public class CartService : ICartService
 
     private IQueryable<CartItemDto> GetCartItemsQuery(int userId)
     {
-        return _dbContext.CartItems
+        return _dbContext.SepetD
             .AsNoTracking()
-            .Where(item => item.Cart.UserId == userId)
+            .Where(item => item.SepetR.UserId == userId)
             .OrderBy(item => item.Id)
             .Select(item => new CartItemDto
             {
@@ -178,6 +185,22 @@ public class CartService : ICartService
                     && item.Product.Category.IsActive
                     && item.Product.StockQuantity > 0
             });
+    }
+
+    private async Task RefreshCartTotalAsync(int sepetRId)
+    {
+        // SepetR.TotalAmount yeni alan olduğu için sepet değişince toplamı burada güncelledim.
+        var totalAmount = await _dbContext.SepetD
+            .Where(item => item.SepetRId == sepetRId)
+            .SumAsync(item => (decimal?)item.Product.Price * item.Quantity) ?? 0m;
+
+        var cart = await _dbContext.SepetR.FirstOrDefaultAsync(item => item.Id == sepetRId);
+
+        if (cart is not null)
+        {
+            cart.TotalAmount = totalAmount;
+            cart.UpdatedAt = DateTime.UtcNow;
+        }
     }
 
     private static CartDto ToCartDto(IReadOnlyList<CartItemDto> items)

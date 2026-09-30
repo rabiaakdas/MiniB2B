@@ -15,10 +15,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
-    public DbSet<Cart> Carts => Set<Cart>();
-    public DbSet<CartItem> CartItems => Set<CartItem>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    // Eski Cart/CartItem/Order/OrderItem DbSet'lerini R/D yapısındaki yeni entity'lere uyarladım.
+    public DbSet<SepetR> SepetR => Set<SepetR>();
+    public DbSet<SepetD> SepetD => Set<SepetD>();
+    public DbSet<SiparisR> SiparisR => Set<SiparisR>();
+    public DbSet<SiparisD> SiparisD => Set<SiparisD>();
     public DbSet<ProductGridColumn> ProductGridColumns => Set<ProductGridColumn>();
     public DbSet<Banner> Banners => Set<Banner>();
 

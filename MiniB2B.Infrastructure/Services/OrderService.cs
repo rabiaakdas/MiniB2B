@@ -27,7 +27,7 @@ public class OrderService : IOrderService
 
         try
         {
-            var cart = await _dbContext.Carts
+            var cart = await _dbContext.SepetR
                 .Include(item => item.Items)
                 .FirstOrDefaultAsync(item => item.UserId == userId);
 
@@ -78,9 +78,12 @@ public class OrderService : IOrderService
                 }
             }
 
-            var order = new Order
+            // Order oluşturma akışını SiparisR ana kaydı oluşturacak şekilde uyarladım.
+            var order = new SiparisR
             {
                 UserId = userId,
+                // Siparişin hangi sepetten oluştuğunu takip etmek için SepetId bağlantısını ekledim.
+                SepetId = cart.Id,
                 OrderNumber = GenerateOrderNumber(),
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Pending
@@ -92,7 +95,8 @@ public class OrderService : IOrderService
                 var unitPrice = product.Price;
                 var totalPrice = unitPrice * cartItem.Quantity;
 
-                order.Items.Add(new OrderItem
+                // OrderItem oluşturma akışını SiparisD detay kaydı oluşturacak şekilde uyarladım.
+                order.Items.Add(new SiparisD
                 {
                     ProductId = product.Id,
                     ProductCode = product.ProductCode,
@@ -107,10 +111,12 @@ public class OrderService : IOrderService
             }
 
             order.TotalAmount = order.Items.Sum(item => item.TotalPrice);
+            // SepetR.TotalAmount yeni alan olduğu için sipariş sonrası ana sepet toplamını sıfırladım.
+            cart.TotalAmount = 0m;
             cart.UpdatedAt = DateTime.UtcNow;
 
-            _dbContext.Orders.Add(order);
-            _dbContext.CartItems.RemoveRange(cartItems);
+            _dbContext.SiparisR.Add(order);
+            _dbContext.SepetD.RemoveRange(cartItems);
 
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -143,7 +149,7 @@ public class OrderService : IOrderService
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var query = _dbContext.Orders
+        var query = _dbContext.SiparisR
             .AsNoTracking()
             .Where(order => order.UserId == userId);
 
@@ -176,7 +182,7 @@ public class OrderService : IOrderService
 
     public async Task<ServiceResult<OrderDetailDto>> GetUserOrderByIdAsync(int userId, int orderId)
     {
-        var order = await _dbContext.Orders
+        var order = await _dbContext.SiparisR
             .AsNoTracking()
             .Where(item => item.Id == orderId && item.UserId == userId)
             .Select(item => new OrderDetailDto
